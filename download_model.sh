@@ -106,6 +106,10 @@ Targets:
 Options:
   --token TOKEN  Hugging Face token. Otherwise HF_TOKEN or the local HF token
                  cache is used if present.
+  --verify       GGUF structural validation after download (instant, checks all
+                 tensor offsets fit within file).
+  --sha256       Full SHA256 verification against HF LFS hash after download
+                 (~1 min per GiB for large files).
 
 Environment:
   DS4_GGUF_DIR   Directory used for downloaded GGUF files.
@@ -139,7 +143,7 @@ MODEL=$1
 shift
 MODEL_FILES=
 LINK_MODEL=1
-FORCE_HF_DOWNLOAD=0
+FORCE_HF_DOWNLOAD=${FORCE_HF_DOWNLOAD:-0}
 FLATTEN_DOWNLOADS=0
 
 case "$MODEL" in
@@ -202,6 +206,12 @@ while [ $# -gt 0 ]; do
             fi
             TOKEN=$1
             ;;
+        --verify)
+            DS4_VERIFY=1
+            ;;
+        --sha256)
+            DS4_SHA256=1
+            ;;
         *)
             echo "Unknown option: $1" >&2
             exit 1
@@ -254,49 +264,52 @@ download_one_hf() {
     file=$1
     local_file=$(local_download_name "$file")
     out="$OUT_DIR/$local_file"
-    hf_out="$OUT_DIR/$file"
-    part="$out.part"
 
     mkdir -p "$(dirname "$out")"
 
-    if [ -s "$out" ]; then
+    if [ -s "$out" ] && [ -z "${DS4_VERIFY:-}" ] && [ -z "${DS4_SHA256:-}" ]; then
         echo "Already downloaded: $out"
         return
     fi
 
-    if [ -e "$part" ]; then
-        echo "Found curl partial download: $part" >&2
-        echo "The Hugging Face downloader cannot resume curl .part files." >&2
-        echo "Move or remove that partial download before retrying this target." >&2
-        exit 1
-    fi
-
-    HF_CMD=$(find_hf_command || true)
-    if [ -z "$HF_CMD" ]; then
-        echo "Large GGUF downloads require the official Hugging Face CLI." >&2
-        echo "Install it with:" >&2
-        echo "  python3 -m pip install -U huggingface_hub hf_xet" >&2
-        exit 1
-    fi
-
-    echo "Downloading $file"
+    echo "$file"
     echo "from https://huggingface.co/$REPO"
-    echo "using $HF_CMD download"
-    echo "If the download stops, run the same command again to resume it."
-
-    if [ -n "$TOKEN" ]; then
-        "$HF_CMD" download "$REPO" "$file" --repo-type model --local-dir "$OUT_DIR" --token "$TOKEN"
+    if [ -s "$out" ]; then
+        echo "using download_resume.py (existing file, verify mode)"
     else
-        "$HF_CMD" download "$REPO" "$file" --repo-type model --local-dir "$OUT_DIR"
+        echo "using download_resume.py (resumable, retries on SSL errors)"
     fi
 
-    if [ "$hf_out" != "$out" ] && [ -s "$hf_out" ]; then
-        mv "$hf_out" "$out"
-        rmdir "$(dirname "$hf_out")" 2>/dev/null || true
+    # Use the robust Python downloader (co-located with this script)
+    SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+    RESUME_SCRIPT="$SCRIPT_DIR/download_resume.py"
+
+    if [ ! -f "$RESUME_SCRIPT" ]; then
+        echo "Resume script not found: $RESUME_SCRIPT" >&2
+        echo "It should be in the same directory as download_model.sh." >&2
+        exit 1
+    fi
+
+    PYTHON="${PYTHON:-python3}"
+    EXTRA_ARGS=""
+    [ -n "${DS4_VERIFY:-}" ] && EXTRA_ARGS="$EXTRA_ARGS --verify"
+    [ -n "${DS4_SHA256:-}" ] && EXTRA_ARGS="$EXTRA_ARGS --sha256"
+    if [ -n "$TOKEN" ]; then
+        # shellcheck disable=SC2086
+        "$PYTHON" "$RESUME_SCRIPT" "$REPO" "$file" --out-dir "$OUT_DIR" --token "$TOKEN" $EXTRA_ARGS
+    else
+        # shellcheck disable=SC2086
+        "$PYTHON" "$RESUME_SCRIPT" "$REPO" "$file" --out-dir "$OUT_DIR" $EXTRA_ARGS
+    fi
+
+    RESULT=$?
+    if [ $RESULT -ne 0 ]; then
+        echo "Download/verification failed." >&2
+        exit $RESULT
     fi
 
     if [ ! -s "$out" ]; then
-        echo "Hugging Face download finished but expected file is missing: $out" >&2
+        echo "Download finished but expected file is missing: $out" >&2
         exit 1
     fi
 }
@@ -322,7 +335,7 @@ download_one() {
         exit 1
     fi
 
-    if [ -s "$out" ]; then
+    if [ -s "$out" ] && [ -z "${DS4_VERIFY:-}" ] && [ -z "${DS4_SHA256:-}" ]; then
         echo "Already downloaded: $out"
         return
     fi
