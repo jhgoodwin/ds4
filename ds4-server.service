@@ -1,0 +1,37 @@
+[Unit]
+Description=DeepSeek V4 server (port 11436, 256K ctx)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=jhgoodwin
+Group=jhgoodwin
+WorkingDirectory=/opt/ds4
+Environment=DS4_THREADS=24
+ExecStart=/opt/ds4/ds4-server \
+    --gpu-devices 0,1 \
+    --gpu-vram 92,92 \
+    --ctx 262144 \
+    --host 0.0.0.0 \
+    --port 11436 \
+    --warm-weights
+Restart=on-failure
+RestartSec=5
+# GPU devices — adapt if device numbers differ
+DeviceAllow=/dev/nvidia0 rw
+DeviceAllow=/dev/nvidia1 rw
+DeviceAllow=/dev/nvidiactl rw
+DeviceAllow=/dev/nvidia-uvm rw
+DeviceAllow=/dev/nvidia-uvm-tools rw
+# GPU persistence daemon dependency
+Requires=nvidia-persistenced.service
+After=nvidia-persistenced.service
+# Limit resources
+LimitNOFILE=65536
+LimitNPROC=4096
+# OOM hardening
+OOMScoreAdjust=-500
+
+[Install]
+WantedBy=multi-user.target
