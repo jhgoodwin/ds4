@@ -32324,35 +32324,6 @@ static bool metal_graph_eval_mtp_draft_from_hc(
         ds4_gpu_tp_suspend_expert_sharding(1);
     }
     bool ok = ds4_gpu_begin_commands() != 0;
-
-    /* ---- MTP Placement fix ----
-     * Save g->placement and force NULL so metal_graph_encode_decode_layer_phase
-     * does NOT switch tiers based on the base model's layer placement.
-     * All MTP scratch buffers live on tier 0; without this, draft>=2 would
-     * switch to GPU 1 (placement[il+1] on a 2-GPU split) and corrupt
-     * peer-accessed hidden state / raw cache memory.
-     */
-    const int *saved_graph_placement = g->placement;
-    const int saved_active_tier = g->active_tier;
-    g->placement = NULL;
-    g->active_tier = 0;
-
-    /* Switch CUDA device to tier 0 for MTP eval.  The preceding base-model
-     * decode may have ended on another tier (e.g. GPU 1).  Without this,
-     * MTP ops run on the wrong device — scratch buffers are on GPU 0 but
-     * CUDA context points at GPU 1, causing selective-cache misses on
-     * every MTP tensor lookup. */
-    if (ds4_gpu_set_current_device(0) != 0) {
-        g->placement = saved_graph_placement;
-        g->active_tier = saved_active_tier;
-        return false;
-    }
-
-    if (getenv("DS4_MTP_DEBUG")) {
-        fprintf(stderr, "MTP_DEBUG metal_graph_eval_mtp_draft_from_hc: token=%d pos=%u placement=NULL active_tier=0\n",
-                token, pos);
-    }
-
     if (ok) ok = ds4_gpu_embed_token_hc_tensor(g->mtp_embed,
                                                   base_model->map,
                                                   base_model->size,
@@ -32400,14 +32371,6 @@ static bool metal_graph_eval_mtp_draft_from_hc(
                                       g->mtp_eproj_hc,
                                       g->mtp_hproj_hc,
                                       (uint32_t)hc_dim) != 0;
-    if (getenv("DS4_MTP_DEBUG") && ok) {
-        float dbg_input[16];
-        (void)ds4_gpu_tensor_read(g->mtp_input_hc, 0, dbg_input, sizeof(dbg_input));
-        fprintf(stderr, "MTP_DEBUG mtp_input_hc[0..15]:");
-        for (int i = 0; i < 16; i++) fprintf(stderr, " %g", dbg_input[i]);
-        fprintf(stderr, "\n");
-    }
-
     if (ok) {
         g->cur_hc_by_tier[g->active_tier] = g->mtp_input_hc;
         g->after_ffn_hc_by_tier[g->active_tier] = out_hc;
@@ -32423,76 +32386,21 @@ static bool metal_graph_eval_mtp_draft_from_hc(
                                              token);
     }
     if (ok) g->cur_hc_by_tier[g->active_tier] = out_hc;
-
-    if (getenv("DS4_MTP_DEBUG") && ok) {
-        float dbg_state[16];
-        if (!ds4_gpu_tensor_read(out_hc, 0, dbg_state, sizeof(dbg_state))) memset(dbg_state, 0, sizeof(dbg_state));
-        fprintf(stderr, "MTP_DEBUG mtp_state_hc[0..15]:");
-        for (int i = 0; i < 16; i++) fprintf(stderr, " %g", dbg_state[i]);
-        fprintf(stderr, "\n");
-    }
-
-    /* Run the MTP output head.  The final vocab-projection matmul uses
-     * base_weights->output which lives on head_tier (GPU 1).  Switch to
-     * head_tier for just the output head + argmax, then switch back. */
-    if (ok && g->head_tier != g->active_tier) {
-        const int saved_tier = g->active_tier;
-        if (ds4_gpu_set_current_device(g->head_tier) == 0) {
-            g->active_tier = g->head_tier;
-            ok = metal_graph_encode_output_head_mtp(g,
+    if (ok) ok = metal_graph_encode_output_head_mtp(g,
                                                     base_model,
                                                     base_weights,
                                                     mtp_model,
                                                     mtp,
                                                     base_weights->output->dim[1]);
-            if (ok && top_id) {
-                ok = ds4_gpu_argmax_tensor(metal_graph_comp_selected(g),
-                                           metal_graph_logits(g),
-                                           DS4_N_VOCAB) != 0;
-            }
-            if (ok) ok = ds4_gpu_end_commands() != 0;
-            ds4_gpu_set_current_device(saved_tier);
-            g->active_tier = saved_tier;
-        } else {
-            ok = false;
-        }
-    } else {
-        if (ok) ok = metal_graph_encode_output_head_mtp(g,
-                                                        base_model,
-                                                        base_weights,
-                                                        mtp_model,
-                                                        mtp,
-                                                        base_weights->output->dim[1]);
-        if (ok && top_id) {
-            ok = ds4_gpu_argmax_tensor(metal_graph_comp_selected(g),
-                                       metal_graph_logits(g),
-                                       DS4_N_VOCAB) != 0;
-        }
-        if (ok) ok = ds4_gpu_end_commands() != 0;
+    if (ok && top_id) {
+        ok = ds4_gpu_argmax_tensor(metal_graph_comp_selected(g),
+                                   metal_graph_logits(g),
+                                   DS4_N_VOCAB) != 0;
     }
-
-    if (getenv("DS4_MTP_DEBUG")) {
-        fprintf(stderr, "MTP_DEBUG after end_commands: ok=%d\n", ok);
-        if (ok && logits) {
-            float dbg_logits[16];
-            if (!ds4_gpu_tensor_read(metal_graph_logits(g), 0, dbg_logits, sizeof(dbg_logits))) memset(dbg_logits, 0, sizeof(dbg_logits));
-            fprintf(stderr, "MTP_DEBUG logits[0..15]:");
-            for (int i = 0; i < 16; i++) fprintf(stderr, " %g", dbg_logits[i]);
-            fprintf(stderr, "\n");
-        }
-    }
-
+    if (ok) ok = ds4_gpu_end_commands() != 0;
     if (suspended_expert_sharding) {
         ds4_gpu_tp_suspend_expert_sharding(0);
     }
-    /* Restore placement, CUDA device, and active_tier after MTP eval */
-    g->placement = saved_graph_placement;
-    ds4_gpu_set_current_device(saved_active_tier);
-    g->active_tier = saved_active_tier;
-
-    /* saved_cur/saved_after restored unconditionally -- intentional.
-     * On success, MTP output HC no longer leaks into cur_hc_by_tier.
-     * All callers pass explicit prev_hc/out_hc params. */
     g->cur_hc_by_tier[g->active_tier] = saved_cur;
     g->after_ffn_hc_by_tier[g->active_tier] = saved_after;
 
@@ -32507,6 +32415,8 @@ static bool metal_graph_eval_mtp_draft_from_hc(
     g->tp_batch_rows = saved_tp_batch_rows;
     if (!ok) {
         (void)ds4_gpu_synchronize();
+        g->cur_hc_by_tier[g->active_tier] = saved_cur;
+        g->after_ffn_hc_by_tier[g->active_tier] = saved_after;
     }
     return ok;
 }
@@ -55300,73 +55210,6 @@ static int engine_install_dspark_support_cache(ds4_engine *e) {
     return 0;
 }
 
-/* Install the legacy MTP model's weight tensors on the selective cache so
- * they are accessible from tier 0 during MTP eval (which runs with
- * placement=NULL to avoid the base model's tier switches).  Registers the
- * MTP model map as a support map with an offset bias, then caches every
- * non-zero tensor on tier 0 (and optionally on all tiers for peer access).
- * The bias ensures cache-key separation from the base model's entries.
- * Also caches the base model's output weight on tier 0 so the MTP output
- * head matmul can resolve it without a device switch.
- * Returns 0 on success. */
-static int engine_install_mtp_legacy_cache(ds4_engine *e) {
-    if (!e->multi_tier || e->support_kind != DS4_SUPPORT_MTP_LEGACY) return 0;
-    if (!e->mtp_ready) return 0;
-    if (!e->mtp_model.map || e->mtp_model.n_tensors == 0) return 0;
-
-    const uint64_t bias = (e->model.size + 4095ull) & ~4095ull;
-    if (!ds4_gpu_register_support_map(e->mtp_model.map, e->mtp_model.size, bias)) {
-        fprintf(stderr, "ds4: failed to register legacy MTP model map\n");
-        return -1;
-    }
-
-    /* Count non-zero tensors for range array. */
-    uint64_t n_nonzero = 0;
-    for (uint64_t ti = 0; ti < e->mtp_model.n_tensors; ti++) {
-        if (e->mtp_model.tensors[ti].bytes != 0) n_nonzero++;
-    }
-    if (n_nonzero == 0) return 0;
-
-    if (n_nonzero > SIZE_MAX / sizeof(ds4_tensor_range)) ds4_die("allocation size overflow");
-    ds4_tensor_range *ranges = xmalloc((size_t)n_nonzero * sizeof(ranges[0]));
-    int n = 0;
-    for (uint64_t ti = 0; ti < e->mtp_model.n_tensors; ti++) {
-        const ds4_tensor *t = &e->mtp_model.tensors[ti];
-        if (t->bytes == 0) continue;
-        ranges[n].source_offset = t->abs_offset;
-        ranges[n].bytes = t->bytes;
-        ranges[n].target_device = g_gpu[0].device_id;
-        n++;
-    }
-
-    /* Cache on tier 0 — where MTP eval runs (placement=NULL, active_tier=0).
-     * For multi-tier, also spill to other tiers for peer-access fallback. */
-    for (int tier = 0; tier < g_n_gpus; tier++) {
-        if (tier > 0) {
-            /* Update target device for this tier. */
-            for (int i = 0; i < n; i++)
-                ranges[i].target_device = g_gpu[tier].device_id;
-        }
-        const int rc = ds4_gpu_device_cache_support_tensors(
-                g_gpu[tier].device_id,
-                g_gpu[tier].device_id,
-                ranges, n, 0);
-        if (rc != 0) {
-            fprintf(stderr,
-                    "ds4: legacy MTP cache install failed on tier %d (rc=%d)\n",
-                    tier, rc);
-            free(ranges);
-            return -1;
-        }
-        fprintf(stderr,
-                "ds4: legacy MTP tensors cached on tier %d (entry on tier %d)\n",
-                tier, tier, n);
-    }
-
-    free(ranges);
-    return 0;
-}
-
 static int engine_install_gpu_placement(ds4_engine *e) {
     if (!e->multi_tier) return 0;
 
@@ -55603,7 +55446,6 @@ const int *ds4_test_engine_placement(const ds4_engine *e) {
 #endif /* DS4_TEST_HOOKS */
 
 static int engine_install_dspark_support_cache(ds4_engine *e);
-static int engine_install_mtp_legacy_cache(ds4_engine *e);
 static int engine_install_gpu_placement(ds4_engine *e);
 static int ds4_engine_open_internal(ds4_engine **out,
                                     const ds4_engine_options *opt,
@@ -56124,11 +55966,6 @@ static int ds4_engine_open_internal(ds4_engine **out,
                 return 1;
             }
             if (engine_install_dspark_support_cache(e) != 0) {
-                ds4_engine_close(e);
-                *out = NULL;
-                return 1;
-            }
-            if (engine_install_mtp_legacy_cache(e) != 0) {
                 ds4_engine_close(e);
                 *out = NULL;
                 return 1;
