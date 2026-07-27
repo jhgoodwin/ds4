@@ -40,3 +40,6 @@ GTAGS
 GRTAGS
 GPATH
 GPATH.*
+
+# speed-bench logs
+speed-bench/mtp-results/*

@@ -1,0 +1,18 @@
+Create an HTML5 single page application that mimics Slack
+
+## Requirements
+
+- Use HTML5 Canvas for rendering
+- Emojis must be prominent and easy as menus on posted messages
+- Messages must be displayed in a chat-like interface
+- Channels must be displayed in a sidebar
+- Users must be displayed in a sidebar
+- Typing `:` must trigger emoji picker
+- Avatars must be displayed in the chat interface
+- A control setting must be available to set the number of simulated users who post messages so the interface feels lively.
+- Simulated users must not spam messages, they must post messages at random intervals that resembles typing based on natural delays and typing speed.
+- The interface must be responsive and work on different screen sizes.
+- The interface must be visually appealing and modern.
+- The interface must be easy to use and navigate.
+- The interface must be accessible and work on different browsers.
+- Sending a message must provide an animation of the message leaving the input field and appearing in the chat.

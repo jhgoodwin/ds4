@@ -1,0 +1,35 @@
+As a single page HTML5 game, implement Flappy Bird with these exact specifications:
+
+1. Game Elements:
+   - A yellow bird that falls due to gravity
+   - Green vertical pipes (tubes) that move from right to left
+   - Ground at the bottom
+   - Score display at the top
+
+2. Controls:
+   - Press SPACE or CLICK to make the bird flap/jump
+   - The bird should rotate slightly when flapping
+
+3. Game Mechanics:
+   - The bird is always moving forward
+   - Pipes appear at random heights but with consistent spacing
+   - If the bird hits a pipe or the ground, it's game over
+   - Score increases by 1 for each pipe passed
+
+4. Visual Style:
+   - Simple, clean graphics
+   - Use basic shapes (circles for bird, rectangles for pipes)
+   - Color scheme: yellow bird, green pipes, blue sky background, brown ground
+
+5. Game States:
+   - Start screen with instructions
+   - Active gameplay
+   - Game over screen with final score
+
+6. Technical Requirements:
+   - Use HTML5 Canvas for rendering
+   - Implement gravity physics
+   - Use requestAnimationFrame for smooth animation
+   - Keep the game responsive and playable
+
+Implement this game with all these features working correctly.

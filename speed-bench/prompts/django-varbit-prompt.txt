@@ -1,0 +1,9 @@
+Write an example of a varbit implementation for PostgreSQL on Django.
+
+## Requirements
+
+- Every bit operand must be supported.
+- Unit tests are to test the operand emits the correct SQL string.
+- A single integration test must prove using a temp table the field and exercise each operand.
+- Bias to simple tests easily read and understood.
+- Limit comments to just what is abstract and not intuitive by a simple reading of the code.
