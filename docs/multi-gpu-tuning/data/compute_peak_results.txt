@@ -1,0 +1,54 @@
+=== Compute Peak Characterization ===
+System: Dual NVIDIA RTX PRO 6000 Blackwell 96GB Max-Q
+CUDA Runtime: 12.9
+
+Devices found: 2
+  GPU 0: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, SMs=188, 102.0 GB HBM, cc=12.0
+  GPU 1: NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition, SMs=188, 102.0 GB HBM, cc=12.0
+
+All tests: 67108864 floats (256 MB), 10 iterations
+
+============================================================
+TEST 1: FMA Peak Throughput
+============================================================
+  FMA peak | GPU 0 | SMs=188 | elems=67108864 | iters=10 | mean=3.367ms | 0.40 TFLOPS
+  FMA peak | GPU 1 | SMs=188 | elems=67108864 | iters=10 | mean=3.373ms | 0.40 TFLOPS
+
+  GPU0: 0.40 TFLOPS | GPU1: 0.40 TFLOPS
+DATA_FMA	0	0.399	3.367	0.050
+DATA_FMA	1	0.398	3.373	0.011
+
+============================================================
+TEST 2: HBM Read Bandwidth
+============================================================
+  Read BW  | GPU 0 | elems=67108864 | iters=10 | mean=1.787ms | 1502 GB/s
+  Read BW  | GPU 1 | elems=67108864 | iters=10 | mean=1.780ms | 1508 GB/s
+
+  GPU0: 1502 GB/s | GPU1: 1508 GB/s
+DATA_READ	0	1502.316	1.787	0.012
+DATA_READ	1	1507.715	1.780	0.003
+
+============================================================
+TEST 3: HBM Copy Bandwidth (read + write)
+============================================================
+  Copy BW | GPU 0 | elems=67108864 | iters=10 | mean=4.161ms | 1290 GB/s
+  Copy BW | GPU 1 | elems=67108864 | iters=10 | mean=4.145ms | 1295 GB/s
+
+  GPU0: 1290 GB/s | GPU1: 1295 GB/s
+DATA_COPY	0	1290.167	4.161	0.016
+DATA_COPY	1	1295.263	4.145	0.029
+
+============================================================
+SUMMARY: Achieved vs Theoretical Ceilings
+============================================================
+
+Theoretical peaks [datasheet: NVIDIA RTX PRO 6000 Blackwell specs]:
+  GPU0 SMs: 188, GPU1 SMs: 188
+  SM clock (max): 3.1 GHz
+  CUDA cores/SM: 128 (Blackwell)
+  Peak FMA TFLOPS/GPU: 148715.5
+  Peak HBM BW: 14337 GB/s (estimated from 8192-bit bus @ 14001 MHz)
+
+  FMA utilization:  GPU0: 0.0% | GPU1: 0.0%
+
+=== Done ===

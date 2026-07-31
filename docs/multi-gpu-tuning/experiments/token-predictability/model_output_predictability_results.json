@@ -1,0 +1,92 @@
+[
+  {
+    "prompt": "django-varbit",
+    "total_tokens_analyzed": 512,
+    "total_chars": 2017,
+    "categories": {
+      "syntactically_forced": {
+        "count": 165,
+        "fraction": 0.322265625,
+        "tag": "[measured: token classification via syntax keyword/pattern matching]"
+      },
+      "name_bound": {
+        "count": 26,
+        "fraction": 0.05078125,
+        "tag": "[measured: analyze_model_output.py name matching against prompt-extracted keywords]"
+      },
+      "pattern_repeating": {
+        "count": 0,
+        "fraction": 0.0,
+        "tag": "[measured: analyze_model_output.py repeating structural pattern detection]",
+        "note": "Always 0% because heuristic requires pattern to appear >1 time before counting as repeating (seen_patterns[pat] > 1). With reasoning-heavy first 512 tokens, no code patterns repeat within this window. This systematically undercounts pattern-repeating fraction for the 512-token analysis."
+      },
+      "semantically_creative": {
+        "count": 321,
+        "fraction": 0.626953125,
+        "tag": "[measured: residual after removing three predictable categories]"
+      }
+    },
+    "total_predictable": 191,
+    "total_predictable_fraction": 0.373046875
+  },
+  {
+    "prompt": "flappy-bird",
+    "total_tokens_analyzed": 512,
+    "total_chars": 2121,
+    "categories": {
+      "syntactically_forced": {
+        "count": 194,
+        "fraction": 0.37890625,
+        "tag": "[measured: token classification via syntax keyword/pattern matching]"
+      },
+      "name_bound": {
+        "count": 47,
+        "fraction": 0.091796875,
+        "tag": "[measured: analyze_model_output.py name matching against prompt-extracted keywords]"
+      },
+      "pattern_repeating": {
+        "count": 0,
+        "fraction": 0.0,
+        "tag": "[measured: analyze_model_output.py repeating structural pattern detection]",
+        "note": "Always 0% because heuristic requires pattern to appear >1 time before counting as repeating (seen_patterns[pat] > 1). With reasoning-heavy first 512 tokens, no code patterns repeat within this window. This systematically undercounts pattern-repeating fraction for the 512-token analysis."
+      },
+      "semantically_creative": {
+        "count": 271,
+        "fraction": 0.529296875,
+        "tag": "[measured: residual after removing three predictable categories]"
+      }
+    },
+    "total_predictable": 241,
+    "total_predictable_fraction": 0.470703125
+  },
+  {
+    "prompt": "slack-clone",
+    "total_tokens_analyzed": 512,
+    "total_chars": 2264,
+    "categories": {
+      "syntactically_forced": {
+        "count": 163,
+        "fraction": 0.318359375,
+        "tag": "[measured: token classification via syntax keyword/pattern matching]"
+      },
+      "name_bound": {
+        "count": 46,
+        "fraction": 0.08984375,
+        "tag": "[measured: analyze_model_output.py name matching against prompt-extracted keywords]"
+      },
+      "pattern_repeating": {
+        "count": 0,
+        "fraction": 0.0,
+        "tag": "[measured: analyze_model_output.py repeating structural pattern detection]",
+        "note": "Always 0% because heuristic requires pattern to appear >1 time before counting as repeating (seen_patterns[pat] > 1). With reasoning-heavy first 512 tokens, no code patterns repeat within this window. This systematically undercounts pattern-repeating fraction for the 512-token analysis."
+      },
+      "semantically_creative": {
+        "count": 303,
+        "fraction": 0.591796875,
+        "tag": "[measured: residual after removing three predictable categories]"
+      }
+    },
+    "total_predictable": 209,
+    "total_predictable_fraction": 0.408203125
+  }
+]

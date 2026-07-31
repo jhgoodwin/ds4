@@ -1,0 +1,24 @@
+ds4: GPU config: 2 devices [0,1] requested, budgets 90,90 GB; auto=true
+ds4: Linux cuda backend set oom_score_adj=1000
+ds4: CUDA backend initialized on NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition (sm_120) dev=0
+ds4: CUDA backend initialized on NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition (sm_120) dev=1
+ds4: peer access 0->1 validated across 4 sizes x 4 iterations (max 16 MiB)
+ds4: peer access 1->0 validated across 4 sizes x 4 iterations (max 16 MiB)
+multi-GPU layout:
+  GPU0: layers 0-23 + embedding  (85.7 / 88.7 GB)
+  GPU1: layers 24-42 + output head  (67.7 / 88.7 GB)
+ds4: per-tier graph scratch reserved: 0.99 GiB (pre-subtracted from each GPU budget)
+ds4: peer access matrix (validated): 0->1 DIRECT 1->0 DIRECT
+ds4: CUDA (no-copy) host registration skipped: operation not supported
+ds4: CUDA tier 0 (device 0) selective weights: 85.70 GiB in 731 ranges
+ds4: CUDA tier 1 (device 1) selective weights: 67.63 GiB in 597 ranges
+ds4: memory: KV 0.10 GiB (raw 0.08 + compressed 0.01) + buffers 0.00 GiB = 0.10 GiB context
+ds4: memory detail: ctx=1024 prefill_cap=1024 raw_kv_rows=1024 compressed_kv_rows=258 backend=cuda
+The user wants me to create a Slack-like single page application using HTML5 Canvas for rendering. Let me think about this carefully and build a comprehensive implementation.
+
+Key requirements:
+1. HTML5 Canvas for rendering
+2. Emojis as menus on posted messages
+3. Chat-like message display
+4. Channels in
+ds4: prefill: 496.16 t/s, generation: 63.04 t/s

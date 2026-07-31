@@ -1115,8 +1115,12 @@ static const __half *cuda_q8_f16_ptr(
     if (g_n_gpus <= 1) {
         q8 = cuda_model_range_ptr(model_map, offset, weight_bytes, "q8_0");
     } else {
+        uint64_t lookup_offset = offset;
+        if (g_support_host_base && model_map == g_support_host_base) {
+            lookup_offset += g_support_offset_bias;
+        }
         void *strict_ptr = NULL;
-        if (!ds4_gpu_lookup_cache_strict(offset, weight_bytes, expected_device, &strict_ptr) ||
+        if (!ds4_gpu_lookup_cache_strict(lookup_offset, weight_bytes, expected_device, &strict_ptr) ||
             !strict_ptr) {
             fprintf(stderr,
                 "ds4: q8 fp16 cache miss: source bytes not in selective cache for "
@@ -1225,8 +1229,12 @@ static float *cuda_q8_f32_ptr(
     if (g_n_gpus <= 1) {
         q8 = cuda_model_range_ptr(model_map, offset, weight_bytes, label ? label : "q8_0");
     } else {
+        uint64_t lookup_offset = offset;
+        if (g_support_host_base && model_map == g_support_host_base) {
+            lookup_offset += g_support_offset_bias;
+        }
         void *strict_ptr = NULL;
-        if (!ds4_gpu_lookup_cache_strict(offset, weight_bytes, expected_device, &strict_ptr) ||
+        if (!ds4_gpu_lookup_cache_strict(lookup_offset, weight_bytes, expected_device, &strict_ptr) ||
             !strict_ptr) {
             fprintf(stderr,
                 "ds4: q8 fp32 cache miss: source bytes not in selective cache for "

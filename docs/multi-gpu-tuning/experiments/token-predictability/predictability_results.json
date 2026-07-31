@@ -1,0 +1,217 @@
+[
+  {
+    "prompt": "django-varbit",
+    "language": "python",
+    "estimated_total_tokens": 350,
+    "categories": {
+      "syntactically_forced": {
+        "tokens": 98,
+        "fraction": 0.28,
+        "tag": "[hypothesis: static analysis of syntax tokens + boilerplate patterns]",
+        "examples": [
+          "elif",
+          "self.",
+          "is",
+          "lambda",
+          "else",
+          "assert",
+          " += ",
+          " -= ",
+          "from ",
+          "class"
+        ],
+        "note": "Examples are from detected language syntax token set; for django-varbit (prompt-name-based Python detection), JS tokens shown below are a display artifact of shared token set \u2014 actual output is Python Django code."
+      },
+      "name_bound": {
+        "tokens": 63,
+        "fraction": 0.18,
+        "tag": "[hypothesis: names extracted from prompt context]",
+        "examples": [
+          "bitand",
+          "bitexpression",
+          "bitmask",
+          "bitnot",
+          "bitor",
+          "bitshiftleft",
+          "bitshiftright",
+          "bitxor",
+          "field",
+          "integrationtest",
+          "model",
+          "operand",
+          "sql",
+          "sqltest",
+          "test",
+          "testvarbit",
+          "varbit",
+          "varbitfield",
+          "varbitvalue"
+        ]
+      },
+      "pattern_repeating": {
+        "tokens": 63,
+        "fraction": 0.18,
+        "tag": "[hypothesis: repeated structural patterns]",
+        "examples": [
+          "indent level 0: 7 lines"
+        ]
+      },
+      "semantically_creative": {
+        "tokens": 126,
+        "fraction": 0.36,
+        "tag": "[hypothesis: requires original generation, remainder]",
+        "examples": [
+          "business logic",
+          "game physics",
+          "rendering details"
+        ]
+      }
+    },
+    "total_predictable_tokens": 224,
+    "total_predictable_fraction": 0.64,
+    "summary": "64% predictable tokens [hypothesis: static analysis]"
+  },
+  {
+    "prompt": "flappy-bird",
+    "language": "javascript",
+    "estimated_total_tokens": 600,
+    "categories": {
+      "syntactically_forced": {
+        "tokens": 108,
+        "fraction": 0.18,
+        "tag": "[hypothesis: static analysis of syntax tokens + boilerplate patterns]",
+        "examples": [
+          "let",
+          "<div",
+          "<style",
+          " += ",
+          "style=",
+          "class",
+          " !== ",
+          "<button",
+          "extends",
+          "try"
+        ],
+        "note": "Examples are from detected language syntax token set; for django-varbit (prompt-name-based Python detection), JS tokens shown below are a display artifact of shared token set \u2014 actual output is Python Django code."
+      },
+      "name_bound": {
+        "tokens": 72,
+        "fraction": 0.12,
+        "tag": "[hypothesis: names extracted from prompt context]",
+        "examples": [
+          "animation",
+          "bird",
+          "canvas",
+          "context",
+          "flap",
+          "flappy",
+          "game",
+          "gameover",
+          "gamestate",
+          "gravity",
+          "ground",
+          "over",
+          "pipe",
+          "pipes",
+          "playing",
+          "score",
+          "start",
+          "velocity"
+        ]
+      },
+      "pattern_repeating": {
+        "tokens": 72,
+        "fraction": 0.12,
+        "tag": "[hypothesis: repeated structural patterns]",
+        "examples": [
+          "indent level 3: 20 lines",
+          "indent level 0: 8 lines"
+        ]
+      },
+      "semantically_creative": {
+        "tokens": 348,
+        "fraction": 0.58,
+        "tag": "[hypothesis: requires original generation, remainder]",
+        "examples": [
+          "business logic",
+          "game physics",
+          "rendering details"
+        ]
+      }
+    },
+    "total_predictable_tokens": 252,
+    "total_predictable_fraction": 0.42,
+    "summary": "42% predictable tokens [hypothesis: static analysis]"
+  },
+  {
+    "prompt": "slack-clone",
+    "language": "javascript",
+    "estimated_total_tokens": 3000,
+    "categories": {
+      "syntactically_forced": {
+        "tokens": 660,
+        "fraction": 0.22,
+        "tag": "[hypothesis: static analysis of syntax tokens + boilerplate patterns]",
+        "examples": [
+          "let",
+          "<div",
+          "<style",
+          " += ",
+          "style=",
+          "class",
+          " !== ",
+          "<button",
+          "extends",
+          "try"
+        ],
+        "note": "Examples are from detected language syntax token set; for django-varbit (prompt-name-based Python detection), JS tokens shown below are a display artifact of shared token set \u2014 actual output is Python Django code."
+      },
+      "name_bound": {
+        "tokens": 540,
+        "fraction": 0.18,
+        "tag": "[hypothesis: names extracted from prompt context]",
+        "examples": [
+          "animation",
+          "avatar",
+          "avatars",
+          "canvas",
+          "channel",
+          "channels",
+          "chat",
+          "emoji",
+          "emojipicker",
+          "message",
+          "messages",
+          "render",
+          "sidebar",
+          "simulated_users",
+          "simulateduser",
+          "slack",
+          "user",
+          "users"
+        ]
+      },
+      "pattern_repeating": {
+        "tokens": 840,
+        "fraction": 0.28,
+        "tag": "[hypothesis: repeated structural patterns]",
+        "examples": [
+          "indent level 0: 16 lines"
+        ]
+      },
+      "semantically_creative": {
+        "tokens": 960,
+        "fraction": 0.32,
+        "tag": "[hypothesis: requires original generation, remainder]",
+        "examples": [
+          "business logic",
+          "game physics",
+          "rendering details"
+        ]
+      }
+    },
+    "total_predictable_tokens": 2040,
+    "total_predictable_fraction": 0.68,
+    "summary": "68% predictable tokens [hypothesis: static analysis]"
+  }
+]

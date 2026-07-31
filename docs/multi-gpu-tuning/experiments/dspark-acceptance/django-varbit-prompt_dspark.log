@@ -1,0 +1,23 @@
+ds4: GPU config: 2 devices [0,1] requested, budgets 90,90 GB; auto=true
+ds4: Linux cuda backend set oom_score_adj=1000
+ds4: DSpark support model detected: /opt/ds4/gguf/DeepSeek-V4-Flash-DSpark-support.gguf (stages=3 block=5 markov_rank=256 tensors=81 missing=0 invalid=0 metadata_errors=0); use --dspark to enable experimental runtime decode
+ds4: CUDA backend initialized on NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition (sm_120) dev=0
+ds4: CUDA backend initialized on NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition (sm_120) dev=1
+ds4: peer access 0->1 validated across 4 sizes x 4 iterations (max 16 MiB)
+ds4: peer access 1->0 validated across 4 sizes x 4 iterations (max 16 MiB)
+multi-GPU layout:
+  GPU0: layers 0-22 + embedding  (82.4 / 85.7 GB)
+  GPU1: layers 23-42 + output head  (71.3 / 85.7 GB)
+ds4: per-tier graph scratch reserved: 3.99 GiB (pre-subtracted from each GPU budget)
+ds4: peer access matrix (validated): 0->1 DIRECT 1->0 DIRECT
+ds4: CUDA (no-copy) host registration skipped: operation not supported
+ds4: CUDA tier 0 (device 0) selective weights: 82.18 GiB in 703 ranges
+ds4: CUDA tier 1 (device 1) selective weights: 71.14 GiB in 625 ranges
+ds4: DSpark support pack tier=1 free=23.27 GiB budget=18.77 GiB
+ds4: DSpark support tensors cached on tier 1 (81 tensors, executor tier)
+ds4: DSpark base embedding bucket cached on tier 1 (1 tensors)
+ds4: memory: KV 0.39 GiB (raw 0.34 + compressed 0.05) + buffers 0.03 GiB = 0.42 GiB context
+ds4: memory detail: ctx=4096 prefill_cap=4096 raw_kv_rows=4096 compressed_kv_rows=1026 backend=cuda
+ds4: DSpark target-hidden capture enabled: layers=40,41,42
+We need to write a Django model field for PostgreSQL's varbit (variable-length bit string). The field should support all bitwise operands: &, |, #, ~, <<, >>, and also comparison, concatenation? Actually "every bit operand must be supported" likely refers to the standard bitwise operators: AND, OR, XOR, NOT, left shift, right shift. Also possibly bit length, substring, get bit, set bit? But the requirement says "every bit operand must be supported" and "unit tests are to test the operand emits the correct SQL string". So we need to define a custom
+ds4: prefill: 153.37 t/s, generation: 65.42 t/s

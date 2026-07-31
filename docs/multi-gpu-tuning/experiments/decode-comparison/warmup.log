@@ -1,0 +1,18 @@
+ds4: GPU config: 2 devices [0,1] requested, budgets 90,90 GB; auto=true
+ds4: Linux cuda backend set oom_score_adj=1000
+ds4: CUDA backend initialized on NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition (sm_120) dev=0
+ds4: CUDA backend initialized on NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition (sm_120) dev=1
+ds4: peer access 0->1 validated across 4 sizes x 4 iterations (max 16 MiB)
+ds4: peer access 1->0 validated across 4 sizes x 4 iterations (max 16 MiB)
+multi-GPU layout:
+  GPU0: layers 0-22 + embedding  (82.4 / 85.7 GB)
+  GPU1: layers 23-42 + output head  (71.3 / 85.7 GB)
+ds4: per-tier graph scratch reserved: 3.99 GiB (pre-subtracted from each GPU budget)
+ds4: peer access matrix (validated): 0->1 DIRECT 1->0 DIRECT
+ds4: CUDA (no-copy) host registration skipped: operation not supported
+ds4: CUDA tier 0 (device 0) selective weights: 82.18 GiB in 703 ranges
+ds4: CUDA tier 1 (device 1) selective weights: 71.14 GiB in 625 ranges
+ds4: memory: KV 0.39 GiB (raw 0.34 + compressed 0.05) + buffers 0.03 GiB = 0.42 GiB context
+ds4: memory detail: ctx=4096 prefill_cap=4096 raw_kv_rows=4096 compressed_kv_rows=1026 backend=cuda
+We need to respond to a simple greeting. The
+ds4: prefill: 27.71 t/s, generation: 52.14 t/s

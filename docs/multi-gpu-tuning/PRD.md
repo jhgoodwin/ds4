@@ -4,7 +4,7 @@
 
 Characterize the gap between **mathematical throughput limits** and **measured throughput** on a multi-GPU pipeline-parallel inference system. Identify root causes of throughput loss, quantify each contributor, and produce a decision framework for tuning.
 
-Primary case study: dual RTX 6000 Pro Blackwell 96GB Max-Q (PCIe Gen 5 x8 per card, split from x16) running inside Proxmox VE with direct GPU passthrough, 96GB OS RAM, PCIe Gen 5 x4 storage, PCIe Gen 4 x4 storage.
+Primary case study: dual RTX PRO 6000 Blackwell 96GB Max-Q (PCIe Gen 5 x8 per card, split from x16) running inside Proxmox VE with direct GPU passthrough, 96GB OS RAM, PCIe Gen 5 x4 storage, PCIe Gen 4 x4 storage.
 
 **All experiments governed by [GROUND-RULES.md](GROUND-RULES.md)** — experimental methodology, hypothesis structure, abandonment criteria, learning rate optimization, and assumption hygiene rules apply to every test in this project.
 
@@ -14,8 +14,8 @@ Primary case study: dual RTX 6000 Pro Blackwell 96GB Max-Q (PCIe Gen 5 x8 per ca
 
 | Component | Detail |
 |---|---|
-| GPU 0 | NVIDIA RTX 6000 Pro Blackwell 96GB Max-Q |
-| GPU 1 | NVIDIA RTX 6000 Pro Blackwell 96GB Max-Q |
+| GPU 0 | NVIDIA RTX PRO 6000 Blackwell 96GB Max-Q |
+| GPU 1 | NVIDIA RTX PRO 6000 Blackwell 96GB Max-Q |
 | GPU interconnect | PCIe Gen 5 x8 per card (x16 CPU lanes split across 2 slots) |
 | Peer access | GPU peer-to-peer DMA via PCIe (not NVLink) |
 | System RAM | 96 GB OS RAM |
@@ -48,7 +48,7 @@ Primary case study: dual RTX 6000 Pro Blackwell 96GB Max-Q (PCIe Gen 5 x8 per ca
 
 For every operation in the inference pipeline, compute the **roofline limit**:
 
-- **Compute-bound**: FLOPs per token / peak FMA throughput of 2× RTX 6000 Pro Blackwell
+- **Compute-bound**: FLOPs per token / peak FMA throughput of 2× RTX PRO 6000 Blackwell
 - **Memory-bound (device)**: bytes per token / HBM bandwidth of both GPUs
 - **Memory-bound (cross-device)**: bytes transferred per token / PCIe Gen 5 x8 bandwidth (unidirectional + bidirectional)
 - **Memory-bound (storage)**: bytes read per token / NVMe sequential read bandwidth
@@ -308,7 +308,7 @@ The aggregate maintenance cost should be measured as fraction of total decode ti
 
 ## 5. Deliverables
 
-### 6.1 Documents
+### 5.1 Documents
 
 | Document | Content |
 |---|---|
@@ -322,7 +322,7 @@ The aggregate maintenance cost should be measured as fraction of total decode ti
 | `tuning-guide.md` | Decision framework: given workload X and hardware Y, which knobs to turn |
 | `scalability-analysis.md` | How each technique scales to N GPUs, where bottlenecks appear |
 
-### 6.2 Experimental Artifacts
+### 5.2 Experimental Artifacts
 
 | Artifact | Location |
 |---|---|
@@ -331,7 +331,7 @@ The aggregate maintenance cost should be measured as fraction of total decode ti
 | Raw data | `data/*.csv` — per-experiment measurements |
 | Analysis notebooks | `analysis/` — Python/R scripts for model fitting and visualization |
 
-### 6.3 Decision Framework
+### 5.3 Decision Framework
 
 A flowchart or table mapping:
 
@@ -347,7 +347,7 @@ Then recommended tuning is [X]
 
 ## 6. Constraints & Risks
 
-### 7.1 Constraints
+### 6.1 Constraints
 
 - Proxmox VE passthrough: IOMMU groups must allow both GPUs to be passed to the same VM.
 - Max-Q power limits: sustained inference may trigger throttling after ~30-60 seconds.
@@ -355,7 +355,7 @@ Then recommended tuning is [X]
 - 96 GB system RAM limits host-side buffers for cross-device bounce transfers.
 - Two storage tiers: Gen 5 x4 (system) and Gen 4 x4 (data) — benchmark both.
 
-### 7.2 Risks
+### 6.2 Risks
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
